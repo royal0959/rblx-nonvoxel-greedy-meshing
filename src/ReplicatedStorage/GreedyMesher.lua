@@ -8,7 +8,7 @@ local function canMerge(part1: Instance, part2: Instance, excludeAxis: string, m
 	for _, axisEnum in pairs(Enum.Axis:GetEnumItems()) do
 		local axis = axisEnum.Name
 
-		local diff = math.abs(part1.Position[axis] - part2.Position[axis])
+		local diff = math.abs(part1.CFrame:ToObjectSpace(part2.CFrame).Position[axis])
 
 		if diff <= 0.02 then
 			equalPosAxises += 1
@@ -46,9 +46,7 @@ local function canMerge(part1: Instance, part2: Instance, excludeAxis: string, m
 
 		local isPartOfSameGroup = propsEqual == #compareProps
 
-		local orientationMatch = true --part1.Orientation == part2.Orientation
-
-		if diff <= 0.1 and orientationMatch and isPartOfSameGroup then
+		if diff <= 0.1 and isPartOfSameGroup then
 			equalAxises += 1
 
 			if equalAxises == 2 then
@@ -82,7 +80,8 @@ function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: 
 				axis == "Z" and part.Size.Z / 2 * mult or 0
 			)
 
-			local origin = part.CFrame * extend
+			local cfOrientation = CFrame.Angles(math.rad(part.Orientation.X), math.rad(part.Orientation.Y), math.rad(part.Orientation.Z))
+			local origin = part.CFrame * (extend * cfOrientation)
 
 			local boundSize = mergeProperties.BoundSize or Vector3.new(0.001, 0.001, 0.001)
 			local touching = workspace:GetPartBoundsInBox(origin, boundSize, OP)
