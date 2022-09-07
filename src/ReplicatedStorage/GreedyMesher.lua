@@ -31,8 +31,22 @@ local function canMerge(part1: Instance, part2: Instance, excludeAxis: string, m
 		end
 
 		local diff = math.abs(part1.Size[axis] - part2.Size[axis])
-		local isPartOfSameGroup = part1.Color == part2.Color and part1.Material == part2.Material --placeholder
-		local orientationMatch = part1.Orientation == part2.Orientation
+
+		-- check if each of these properties are equal on both parts
+		local compareProps = { "Color", "Material", "Transparency", "Shape" }
+
+		local propsEqual = 0
+		for _, prop in pairs(compareProps) do
+			if part1[prop] ~= part2[prop] then
+				break
+			end
+
+			propsEqual += 1
+		end
+
+		local isPartOfSameGroup = propsEqual == #compareProps
+
+		local orientationMatch = true --part1.Orientation == part2.Orientation
 
 		if diff <= 0.1 and orientationMatch and isPartOfSameGroup then
 			equalAxises += 1
@@ -45,7 +59,7 @@ local function canMerge(part1: Instance, part2: Instance, excludeAxis: string, m
 end
 
 function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: Array<any>)
-	if part.Parent then
+	if not part.Parent then
 		return
 	end
 
@@ -53,66 +67,75 @@ function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: 
 	if not OP then
 		OP = OverlapParams.new()
 		OP.FilterType = Enum.RaycastFilterType.Whitelist
-		OP.FilterDescendantsInstances = {workspace}
+		OP.FilterDescendantsInstances = { workspace }
 	end
+
+	mergeProperties = mergeProperties or {}
 
 	for _, axisEnum in pairs(Enum.Axis:GetEnumItems()) do
 		local axis = axisEnum.Name
 
-		local mult = -1
+		for _, mult in pairs({ -1, 1 }) do
+			local extend = CFrame.new(
+				axis == "X" and part.Size.X / 2 * mult or 0,
+				axis == "Y" and part.Size.Y / 2 * mult or 0,
+				axis == "Z" and part.Size.Z / 2 * mult or 0
+			)
 
-		local extend = CFrame.new(
-			axis == "X" and part.Size.X / 2 * mult or 0,
-			axis == "Y" and part.Size.Y / 2 * mult or 0,
-			axis == "Z" and part.Size.Z / 2 * mult or 0
-		)
+			local origin = part.CFrame * extend
 
-		local origin = part.CFrame * extend
+			local boundSize = mergeProperties.BoundSize or Vector3.new(0.001, 0.001, 0.001)
+			local touching = workspace:GetPartBoundsInBox(origin, boundSize, OP)
 
-		local boundSize = mergeProperties.BoundSize or Vector3.new(0.001, 0.001, 0.001)
-		local touching = workspace:GetPartBoundsInBox(origin, boundSize, OP)
+			-- local p = Instance.new("Part")
+			-- p.Anchored = true
+			-- p.Size = Vector3.new(1, 1, 1)
+			-- p.CFrame = origin
+			-- p.Transparency = 0.5
+			-- p.Parent = workspace
 
-		for i = 1, #touching do
-			local touchPart = touching[i]
+			for i = 1, #touching do
+				local touchPart = touching[i]
 
-			if touchPart == part then
-				continue
-			end
-
-			if not touchPart:IsA("Part") then
-				continue
-			end
-
-			if not canMerge(part, touchPart, axis, mergeProperties) then
-				continue
-			end
-
-			if mergeProperties.Filter then
-				if not mergeProperties.Filter(part, touchPart, axis) then
+				if touchPart == part then
 					continue
 				end
+
+				if not touchPart:IsA("Part") then
+					continue
+				end
+
+				if not canMerge(part, touchPart, axis, mergeProperties) then
+					continue
+				end
+
+				if mergeProperties.Filter then
+					if not mergeProperties.Filter(part, touchPart, axis) then
+						continue
+					end
+				end
+
+				local mergeSize = Vector3.new(
+					axis == "X" and touchPart.Size.X or 0,
+					axis == "Y" and touchPart.Size.Y or 0,
+					axis == "Z" and touchPart.Size.Z or 0
+				)
+
+				local mergePosition = Vector3.new(
+					axis == "X" and -touchPart.Size.X / 2 * -mult or 0,
+					axis == "Y" and -touchPart.Size.Y / 2 * -mult or 0,
+					axis == "Z" and -touchPart.Size.Z / 2 * -mult or 0
+				)
+
+				part.CFrame *= CFrame.new(mergePosition)
+				part.Size += mergeSize
+
+				touchPart:Destroy()
+
+				self:MergeNearby(part, OP, mergeProperties)
+
+				return
 			end
-
-			local mergeSize = Vector3.new(
-				axis == "X" and touchPart.Size.X or 0,
-				axis == "Y" and touchPart.Size.Y or 0,
-				axis == "Z" and touchPart.Size.Z or 0
-			)
-
-			local mergePosition = Vector3.new(
-				axis == "X" and -touchPart.Size.X / 2 or 0,
-				axis == "Y" and -touchPart.Size.Y / 2 or 0,
-				axis == "Z" and -touchPart.Size.Z / 2 or 0
-			)
-
-			part.CFrame *= CFrame.new(mergePosition)
-			part.Size += mergeSize
-
-			touchPart:Destroy()
-
-			self:MergeNearby(part, OP, mergeProperties)
-
-			return
 		end
 	end
 end
@@ -120,7 +143,7 @@ end
 function Mesher:MergeParts(parts: Array<Instance>, mergeProperties: Array<any>)
 	local OP = OverlapParams.new()
 	OP.FilterType = Enum.RaycastFilterType.Whitelist
-	OP.FilterDescendantsInstances = {parts}
+	OP.FilterDescendantsInstances = { parts }
 
 	for _, part in pairs(parts) do
 		self:MergeNearby(part, OP, mergeProperties)
