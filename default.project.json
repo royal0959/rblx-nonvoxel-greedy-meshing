@@ -1,0 +1,11 @@
+{
+	"name": "rblx-nonvoxel-greedy-meshing",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"$ignoreUnknownInstances": true,
+			"$path": "src/ReplicatedStorage"
+		}
+	}
+}
