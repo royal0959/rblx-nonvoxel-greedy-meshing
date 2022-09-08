@@ -1,6 +1,6 @@
 local Mesher = {}
 
-local function canMerge(part1: Instance, part2: Instance, excludeAxis: string, mergeProperties: Array<any>)
+local function canMerge(part1: Instance, part2: Instance, excludeAxis: string)
 	local equalAxises = 0
 
 	local equalPosAxises = 0
@@ -85,13 +85,6 @@ function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: 
 
 			local boundSize = mergeProperties.BoundSize or Vector3.new(0.001, 0.001, 0.001)
 			local touching = workspace:GetPartBoundsInBox(origin, boundSize, OP)
-
-			-- local p = Instance.new("Part")
-			-- p.Anchored = true
-			-- p.Size = Vector3.new(1, 1, 1)
-			-- p.CFrame = origin
-			-- p.Transparency = 0.5
-			-- p.Parent = workspace
 
 			for i = 1, #touching do
 				local touchPart = touching[i]
