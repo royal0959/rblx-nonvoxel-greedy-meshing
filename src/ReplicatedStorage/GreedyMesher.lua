@@ -56,7 +56,7 @@ local function canMerge(part1: Instance, part2: Instance, excludeAxis: string)
 	end
 end
 
-function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: Array<any>)
+function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: table)
 	if not part.Parent then
 		return
 	end
@@ -132,7 +132,7 @@ function Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: 
 	end
 end
 
-function Mesher:MergeParts(parts: Array<Instance>, mergeProperties: Array<any>)
+function Mesher:MergeParts(parts: table, mergeProperties: table)
 	local OP = OverlapParams.new()
 	OP.FilterType = Enum.RaycastFilterType.Whitelist
 	OP.FilterDescendantsInstances = { parts }
