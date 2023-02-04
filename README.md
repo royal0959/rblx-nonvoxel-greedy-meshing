@@ -24,7 +24,7 @@ Currently, there are 2 merge properties:
 Changes the size of collision bounds used to find parts to merge around a part, default is Vector3.new(0.001, 0.001, 0.001). Not recommendeded to be changed lest you know what you're doing
 <hr>
 <code>mergeProperties.Filter: function(part, touchPart, axis)</code> <br>
-Defines extra criteria(s) for merging. If the function returns true, parts will not be merged and vice versa. Can be used for cases such as restricting specific marked parts from being merged <br><br>
+Defines extra criteria(s) for merging. If the function returns false, parts will not be merged and vice versa. Can be used for cases such as restricting specific marked parts from being merged <br><br>
 
 Example:
 <pre><code>
