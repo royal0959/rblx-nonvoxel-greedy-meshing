@@ -1,0 +1,10 @@
+[package]
+name = "royal0959/rblx-nonvoxel-greedy-meshing"
+description = "Non-voxel greedy mesher for runtime parts merging/map optimization"
+version = "1.0.0"
+license = "MIT"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+
