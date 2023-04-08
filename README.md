@@ -2,7 +2,7 @@
 module for merging parts that don't need to be adhere to voxel grids
 
 <h1>Functions</h1>
-<code>Mesher:MergeNearby(part: Instance, OP: OverlapParams, mergeProperties: Array<any>)</code> <br>
+<code>Mesher:MergeNearby(part: BasePart, OP: OverlapParams, mergeProperties: MergeProperties)</code> <br>
 Attempt to merge part with nearby compatible parts. OP and mergeProperties are optional, if an OverlapParams is not provided, part can merge with any parts in workspace
 
 <br>Example:
@@ -10,7 +10,7 @@ Attempt to merge part with nearby compatible parts. OP and mergeProperties are o
 
 <hr> 
 
-<code>Mesher:MergeParts(parts: Array<Instance>, mergeProperties: Array<any>)</code> <br>
+<code>Mesher:MergeParts(parts: { BasePart }, mergeProperties: MergeProperties)</code> <br>
 Attempt to merge provided parts with eachother. mergeProperties is optional
 
 <br>Example:
